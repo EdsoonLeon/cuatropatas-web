@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/app/components/ui/card';
 import { Badge } from '@/app/components/ui/badge';
 import { AlertTriangle } from 'lucide-react';
@@ -20,7 +20,7 @@ function MedicamentoForm({ open, onOpenChange, onSubmit, medicamentoEditar }) {
   const [form, setForm] = useState(formInicial);
   const [loading, setLoading] = useState(false);
 
-  useState(() => {
+  useEffect(() => {
     if (medicamentoEditar) {
       setForm({
         nombre: medicamentoEditar.nombre || '',

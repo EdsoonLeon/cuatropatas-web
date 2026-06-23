@@ -20,13 +20,9 @@ export function useCitas() {
   };
 
   const crear = async (datos) => {
-    try {
-      await citaApi.create(datos);
-      await obtenerTodas();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Error al crear cita');
-      throw err;
-    }
+    // Lanza el error para que el formulario lo maneje; no sobreescribe error global de carga
+    await citaApi.create(datos);
+    await obtenerTodas();
   };
 
   const cambiarEstado = async (id, estado, observaciones) => {
@@ -40,7 +36,7 @@ export function useCitas() {
 
   const cancelar = async (id, motivo) => {
     try {
-      await citaApi.cancel(id, { motivoCancelacion: motivo });
+      await citaApi.cancel(id, { motivo });
       await obtenerTodas();
     } catch (err) {
       setError(err.response?.data?.message || 'Error al cancelar cita');

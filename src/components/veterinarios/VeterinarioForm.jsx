@@ -6,7 +6,7 @@ import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
 
-const formInicial = { nombre: '', apellido: '', especialidad: '', telefono: '', email: '' };
+const formInicial = { nombre: '', apellido: '', especialidad: '', telefono: '', email: '', password: '' };
 
 export default function VeterinarioForm({ open, onOpenChange, onSubmit, veterinarioEditar }) {
   const [form, setForm] = useState(formInicial);
@@ -20,6 +20,7 @@ export default function VeterinarioForm({ open, onOpenChange, onSubmit, veterina
         especialidad: veterinarioEditar.especialidad || '',
         telefono: veterinarioEditar.telefono || '',
         email: veterinarioEditar.email || '',
+        password: '',
       });
     } else {
       setForm(formInicial);
@@ -71,6 +72,20 @@ export default function VeterinarioForm({ open, onOpenChange, onSubmit, veterina
               <Input type="email" value={form.email} onChange={set('email')} placeholder="vet@clinica.com" className="rounded-xl" />
             </div>
           </div>
+          {!veterinarioEditar && (
+            <div className="space-y-2">
+              <Label>Contraseña inicial</Label>
+              <Input
+                type="password"
+                value={form.password}
+                onChange={set('password')}
+                placeholder="Mínimo 6 caracteres"
+                className="rounded-xl"
+                required
+                minLength={6}
+              />
+            </div>
+          )}
           <div className="flex justify-end space-x-3 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl">Cancelar</Button>
             <Button type="submit" disabled={loading} className="rounded-xl bg-primary">

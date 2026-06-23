@@ -20,12 +20,7 @@ export function useHistorial() {
   };
 
   const crear = async (datos) => {
-    try {
-      await historialApi.create(datos);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Error al crear registro');
-      throw err;
-    }
+    await historialApi.create(datos);
   };
 
   const eliminar = async (id) => {

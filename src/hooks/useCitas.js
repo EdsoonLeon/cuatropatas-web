@@ -20,9 +20,10 @@ export function useCitas() {
   };
 
   const crear = async (datos) => {
-    // Lanza el error para que el formulario lo maneje; no sobreescribe error global de carga
+    // Lanza el error de creación para que el formulario lo muestre
     await citaApi.create(datos);
-    await obtenerTodas();
+    // El refresh no debe bloquear ni propagar error al formulario
+    obtenerTodas();
   };
 
   const cambiarEstado = async (id, estado, observaciones) => {

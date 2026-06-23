@@ -3,7 +3,7 @@ import { Card } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
 import { Badge } from '@/app/components/ui/badge';
 import { Calendar } from '@/app/components/ui/calendar';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import CitasList from '../components/citas/CitasList';
 import CitaForm from '../components/citas/CitaForm';
 import ConfirmDialog from '../components/shared/ConfirmDialog';
@@ -13,6 +13,15 @@ import { useCitas } from '../hooks/useCitas';
 import { useMascotas } from '../hooks/useMascotas';
 import { useVeterinarios } from '../hooks/useVeterinarios';
 
+function mismaFecha(fechaHora, referencia) {
+  const d = new Date(fechaHora);
+  return (
+    d.getDate() === referencia.getDate() &&
+    d.getMonth() === referencia.getMonth() &&
+    d.getFullYear() === referencia.getFullYear()
+  );
+}
+
 export default function CitasPage() {
   const { citas, loading, error, obtenerTodas, crear, cambiarEstado, cancelar } = useCitas();
   const { mascotas } = useMascotas();
@@ -20,14 +29,24 @@ export default function CitasPage() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [citaACancelar, setCitaACancelar] = useState(null);
-  const [fecha, setFecha] = useState(new Date());
+  const [fechaFiltro, setFechaFiltro] = useState(null);
 
-  const citasHoy = citas.filter((c) => {
-    if (!c.fechaHora) return false;
-    const d = new Date(c.fechaHora);
-    const hoy = new Date();
-    return d.getDate() === hoy.getDate() && d.getMonth() === hoy.getMonth() && d.getFullYear() === hoy.getFullYear();
-  });
+  const hoy = new Date();
+  const citasHoy = citas.filter((c) => c.fechaHora && mismaFecha(c.fechaHora, hoy));
+
+  const citasMostradas = fechaFiltro
+    ? citas.filter((c) => c.fechaHora && mismaFecha(c.fechaHora, fechaFiltro))
+    : citas;
+
+  const handleSeleccionarFecha = (d) => {
+    if (!d) { setFechaFiltro(null); return; }
+    // Si el usuario hace clic en la misma fecha ya seleccionada, limpia el filtro
+    if (fechaFiltro && mismaFecha(d, fechaFiltro)) {
+      setFechaFiltro(null);
+    } else {
+      setFechaFiltro(d);
+    }
+  };
 
   const handleCrear = async (datos) => {
     await crear(datos);
@@ -59,7 +78,12 @@ export default function CitasPage() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <Card className="p-6 rounded-2xl">
           <h3 className="text-lg font-semibold mb-4">Calendario</h3>
-          <Calendar mode="single" selected={fecha} onSelect={setFecha} className="rounded-xl" />
+          <Calendar
+            mode="single"
+            selected={fechaFiltro ?? undefined}
+            onSelect={handleSeleccionarFecha}
+            className="rounded-xl"
+          />
           <div className="mt-6 space-y-3">
             <div className="flex items-center justify-between p-3 rounded-xl bg-primary/5">
               <span className="text-sm">Hoy</span>
@@ -74,11 +98,28 @@ export default function CitasPage() {
 
         <Card className="xl:col-span-2 p-6 rounded-2xl">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold">Citas del Día</h3>
-            <Badge variant="outline" className="rounded-lg">{citasHoy.length} citas</Badge>
+            <h3 className="text-lg font-semibold">
+              {fechaFiltro
+                ? `Citas del ${fechaFiltro.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' })}`
+                : 'Todas las citas'}
+            </h3>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="rounded-lg">{citasMostradas.length} citas</Badge>
+              {fechaFiltro && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-lg h-7 px-2 text-xs text-muted-foreground"
+                  onClick={() => setFechaFiltro(null)}
+                >
+                  <X className="w-3 h-3 mr-1" />
+                  Ver todas
+                </Button>
+              )}
+            </div>
           </div>
           <CitasList
-            citas={citasHoy.length > 0 ? citasHoy : citas}
+            citas={citasMostradas}
             onCambiarEstado={cambiarEstado}
             onCancelar={(id) => setCitaACancelar(id)}
           />
